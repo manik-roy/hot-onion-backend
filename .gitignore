@@ -49,7 +49,7 @@ web_modules/
 
 # Optional npm cache directory
 .npm
-config.env
+/config.env
 # Optional eslint cache
 .eslintcache
 
@@ -113,3 +113,6 @@ dist
 .yarn/unplugged
 .yarn/build-state.yml
 .pnp.*
+config.env
+./config.env
+config.env
