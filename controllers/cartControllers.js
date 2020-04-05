@@ -15,7 +15,7 @@ const getAllCart = async (req, res) => {
 // GET A SINGLE CATS
 const getSingleUserCart = async (req, res) => {
   try {
-    const cart = await Cart.find({user:req.params.id});
+    const cart = await Cart.find({ user: req.params.id });
     res.status(200).json({
       status: 'success',
       data: {
@@ -25,26 +25,41 @@ const getSingleUserCart = async (req, res) => {
   } catch {
     res.status(400).json({
       status: 'fail',
-      message:'Error'
+      message: 'Error'
     });
   }
 }
 
 // CREATE A CART
 const createCart = async (req, res) => {
- 
-  let item = {...req.body}
-  const allCart = await Cart.find();
-  
-  let isExist = allCart.find(e => {
-    if(item.productId == e.productId && e.user == item.user) {
-      return e;
+  let item = { ...req.body }
+  console.log('body data =>', item);
+
+  const allCart = await Cart.findOne({ user: item.user });
+  if (allCart) {
+    let isExist = allCart.carts.find(pd => pd.productId == item.carts[0].productId)
+    if (!isExist) {
+
+      item.carts[0].proTotalPrice = item.carts[0].quantity * item.carts[0].price;
+      allCart.carts.push(item.carts[0])
+      const cart = await Cart.findOneAndUpdate({ user: item.user }, allCart, { new: true, runValidators: false });
+      res.status(201).json({
+        status: 'success',
+        data: {
+          cart,
+        },
+      });
+
+    } else {
+
+      isExist.quantity = isExist.quantity + item.carts[0].quantity;
+      isExist.proTotalPrice = isExist.price * isExist.quantity;
+      let index = allCart.carts.indexOf( isExist._id);
+      allCart.carts[index] = isExist;
+      const cart = await Cart.findOneAndUpdate({ user: item.user }, allCart, { new: true, runValidators: false });
+
     }
-    
-  })
-  
-  if(!isExist) {
-    item.proTotalPrice = item.quantity * item.price;
+  } else {
     const cart = await Cart.create(item)
     res.status(201).json({
       status: 'success',
@@ -52,37 +67,43 @@ const createCart = async (req, res) => {
         cart,
       },
     });
-  } 
-  else {
-    isExist.quantity = isExist.quantity + item.quantity
-    isExist.proTotalPrice = isExist.price * isExist.quantity
-    const cart = await Cart.findByIdAndUpdate(isExist._id, isExist, { new: true, runValidators: true });
-    res.status(201).json({
-      status: 'success',
-      data: {
-        cart,
-      },
-    });
-  }  
-
-
+  }
+ 
 }
 
 // UPDATE A CART 
 const updateCart = async (req, res) => {
   try {
-    const cartIdes = req.body;
-    console.log(cartIdes);
-    await cartIdes.forEach( async item => {
-      await Cart.updateMany({ _id: item  },{ $set: {isComplete:true } },{ new: true, runValidators: false } )
-    })
+
+    // await cartIdes.forEach( async item => {
+    //   await Cart.updateMany({ _id: item  },{ $set: {isComplete:true } },{ new: true, runValidators: false } )
+    // })
+    const cart = await Cart.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: false });
+
     res.status(201).json({
       status: 'success',
-      message:'update successfully'
+      message: 'update successfully'
     });
   } catch (error) {
     console.log(error);
   }
+
+}
+
+// DELETE A CART 
+const deleteManyItem = async (req, res) => {
+  console.log('delete many', req.body);
+
+  const cartIdes = req.body;
+  await cartIdes.forEach(async item => {
+    await Cart.findByIdAndDelete(item)
+  })
+  res.status(200).json({
+    status: 'success',
+    data: {
+      massage: 'Delete Successfully',
+    },
+  });
 
 }
 
@@ -97,10 +118,12 @@ const deleteCart = async (req, res) => {
   });
 }
 
+
 module.exports = {
   getAllCart,
   getSingleUserCart,
   updateCart,
   createCart,
-  deleteCart
+  deleteCart,
+  deleteManyItem
 }

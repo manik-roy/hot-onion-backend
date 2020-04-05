@@ -2,6 +2,8 @@ const express = require('express');
 const cartControllers = require('../controllers/cartControllers');
 const router = express.Router();
 
+router.put('/deletes', cartControllers.deleteManyItem)
+
 router
     .route('/')
     .get(cartControllers.getAllCart)
