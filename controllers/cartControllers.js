@@ -74,11 +74,23 @@ const createCart = async (req, res) => {
 // UPDATE A CART 
 const updateCart = async (req, res) => {
   try {
+    console.log('product id',req.body);
+    let index = 0;
+    const allCartItem = await Cart.findOne({user:req.body.user});
+    const isExist = allCartItem.carts.filter((item, i) => {
+      if(item._id == req.params.id) {
+        index = i;
+        return item;
+      }
+    });
+     
+    console.log(isExist);
+    
+    isExist[0].quantity = req.body.quantity;
+    isExist[0].proTotalPrice = isExist[0].quantity * isExist[0].price;
+    allCartItem.carts[index] = isExist[0];
 
-    // await cartIdes.forEach( async item => {
-    //   await Cart.updateMany({ _id: item  },{ $set: {isComplete:true } },{ new: true, runValidators: false } )
-    // })
-    const cart = await Cart.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: false });
+    const cart = await Cart.findByIdAndUpdate(allCartItem._id, allCartItem, { new: true, runValidators: false });
 
     res.status(201).json({
       status: 'success',
@@ -92,12 +104,9 @@ const updateCart = async (req, res) => {
 
 // DELETE A CART 
 const deleteManyItem = async (req, res) => {
-  console.log('delete many', req.body);
 
-  const cartIdes = req.body;
-  await cartIdes.forEach(async item => {
-    await Cart.findByIdAndDelete(item)
-  })
+  await Cart.findOneAndDelete({user:req.params.id})
+  
   res.status(200).json({
     status: 'success',
     data: {

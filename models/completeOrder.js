@@ -21,13 +21,16 @@ const completeOrderSchema = new mongoose.Schema({
     type: String,
     trim: true,
   },
+  subTotal:{
+    type:Number
+  },
   cart: [Object],
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true,
   },
-})
+}, { timestamps: true })
 
 const Order = mongoose.model('Order', completeOrderSchema);
 module.exports = Order;
