@@ -33,8 +33,6 @@ const getSingleUserCart = async (req, res) => {
 // CREATE A CART
 const createCart = async (req, res) => {
   let item = { ...req.body }
-  console.log('body data =>', item);
-
   const allCart = await Cart.findOne({ user: item.user });
   if (allCart) {
     let isExist = allCart.carts.find(pd => pd.productId == item.carts[0].productId)
@@ -74,7 +72,7 @@ const createCart = async (req, res) => {
 // UPDATE A CART 
 const updateCart = async (req, res) => {
   try {
-    console.log('product id',req.body);
+    
     let index = 0;
     const allCartItem = await Cart.findOne({user:req.body.user});
     const isExist = allCartItem.carts.filter((item, i) => {
@@ -83,9 +81,7 @@ const updateCart = async (req, res) => {
         return item;
       }
     });
-     
-    console.log(isExist);
-    
+         
     isExist[0].quantity = req.body.quantity;
     isExist[0].proTotalPrice = isExist[0].quantity * isExist[0].price;
     allCartItem.carts[index] = isExist[0];
@@ -106,7 +102,6 @@ const updateCart = async (req, res) => {
 const deleteManyItem = async (req, res) => {
 
   await Cart.findOneAndDelete({user:req.params.id})
-  
   res.status(200).json({
     status: 'success',
     data: {
@@ -118,13 +113,19 @@ const deleteManyItem = async (req, res) => {
 
 // DELETE A CART 
 const deleteCart = async (req, res) => {
-  const cart = await Cart.findByIdAndDelete(req.params.id);
+ console.log(req.params.id);
+ 
+  const cart = await Cart.findOne({user:req.query.user});
+  var newCarts = cart.carts.filter(item => item._id != req.params.id)
+  cart.carts = newCarts
+  await Cart.findByIdAndUpdate(cart._id, cart, { new: true, runValidators: false })
   res.status(200).json({
     status: 'success',
     data: {
       massage: 'Delete Successfully',
     },
   });
+  
 }
 
 

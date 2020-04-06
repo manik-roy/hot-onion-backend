@@ -21,6 +21,9 @@ const completeOrderSchema = new mongoose.Schema({
     type: String,
     trim: true,
   },
+  payInfo:{
+    type:Object
+  },
   subTotal:{
     type:Number
   },

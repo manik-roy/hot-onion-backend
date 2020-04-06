@@ -25,9 +25,7 @@ const getSingleUser = async (req, res) => {
 // GET A SINGLE BY EMAIL
 const getUserByEmail = async (req, res) => {
   
-  const user = await User.findOne({email:req.params.email});
-  console.log(user);
-  
+  const user = await User.findOne({email:req.params.email});  
   res.status(200).json({
     status: 'success',
     data: {
